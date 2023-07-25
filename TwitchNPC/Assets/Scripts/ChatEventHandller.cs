@@ -1,3 +1,4 @@
+using OpenAi.Unity.V1;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -36,8 +37,8 @@ public class ChatEventHandller : MonoBehaviour
 
         if (_actionQueue.TryDequeue(out MessageData action))
         {
-            PerformAction(action);
             _isInAction = true;
+            PerformAction(action);
         }
     }
 
@@ -53,15 +54,29 @@ public class ChatEventHandller : MonoBehaviour
                 _animator.SetTrigger(message.Substring(1));
                 break;
             case '?':
-                Debug.Log($"@{chatter}, {Reply(message.Substring(1))}");
+                StartCoroutine(Reply(action.Chatter, message.Substring(1)));
                 break;
         }
         
     }
 
-    private string Reply(string message)
+    private IEnumerator Reply(string chatter, string message)
     {
-        return "Hello, I am Motoko";
+        string reply = "Hello, I am Motoko.";
+        if (string.IsNullOrEmpty(message))
+        {
+            Debug.LogError("Example requires input in input field");
+            yield break;
+        }
+
+        yield return OpenAiChatCompleterV1.Instance.Complete(
+            message,
+            s => reply = s,
+            e => reply = $"ERROR: StatusCode: {e.responseCode} - {e.error}"
+        );
+
+        Debug.Log($"@{chatter}, {reply}");
+        _isInAction = false;
     }
 
     private void HandleChatMessage(string chatter, string message)
