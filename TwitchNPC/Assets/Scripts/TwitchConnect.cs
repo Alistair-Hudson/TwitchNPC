@@ -59,8 +59,6 @@ public class TwitchConnect : MonoBehaviour
                 splitPoint = message.IndexOf(":", 1);
                 string msg = message.Substring(splitPoint + 1);
 
-                Debug.Log(chatter);
-                Debug.Log(msg);
                 OnChatMessage?.Invoke(chatter, msg);
             }
         }
